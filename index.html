@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Council Rule [BT]</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Sarabun:wght@300;400;600;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:        #060608;
+    --black-2:      #0e0e12;
+    --dark:         #13131a;
+    --dark-2:       #1c1c28;
+    --gray-deep:    #2a2a3a;
+    --gray-mid:     #4a4a60;
+    --gray-light:   #9090a8;
+    --gray-pale:    #d0d0e0;
+    --gold:         #d4a017;
+    --gold-bright:  #f0c030;
+    --gold-pale:    #f5e090;
+    --gold-dim:     #8a6510;
+    --purple-hint:  rgba(120, 60, 220, 0.18);
+    --purple-soft:  rgba(150, 80, 255, 0.10);
+    --purple-edge:  rgba(170, 100, 255, 0.22);
+    --white:        #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Sarabun', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* === BACKGROUND === */
+  .bg-noise {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* Subtle radial spotlight */
+  .bg-spotlight {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%,
+      rgba(30, 20, 50, 0.5) 0%,
+      transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Purple shimmer veins */
+  .bg-vein {
+    position: fixed;
+    pointer-events: none;
+  }
+  .bg-vein-1 {
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 10%, var(--purple-edge) 40%, rgba(200, 140, 255, 0.15) 50%, var(--purple-edge) 60%, transparent 90%);
+    animation: vein-pulse 6s ease-in-out infinite;
+  }
+  .bg-vein-2 {
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 20%, var(--purple-hint) 50%, transparent 80%);
+    animation: vein-pulse 8s ease-in-out infinite reverse;
+  }
+  @keyframes vein-pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1; }
+  }
+
+  /* Fine grid */
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(100, 60, 180, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(100, 60, 180, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* Corner ambient glows */
+  .bg-glow {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(120px);
+  }
+  .bg-glow-tl {
+    width: 350px; height: 350px;
+    top: -80px; left: -80px;
+    background: radial-gradient(circle, rgba(100, 50, 200, 0.12) 0%, transparent 70%);
+    animation: glow-drift 12s ease-in-out infinite;
+  }
+  .bg-glow-br {
+    width: 300px; height: 300px;
+    bottom: -60px; right: -60px;
+    background: radial-gradient(circle, rgba(120, 60, 220, 0.10) 0%, transparent 70%);
+    animation: glow-drift 14s ease-in-out infinite reverse;
+  }
+  @keyframes glow-drift {
+    0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.8; }
+    50%       { transform: scale(1.15) translate(10px, -15px); opacity: 1; }
+  }
+
+  /* Gold dust particles */
+  .particles { position: fixed; inset: 0; pointer-events: none; }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: particle-rise linear infinite;
+    opacity: 0;
+  }
+  @keyframes particle-rise {
+    0%   { opacity: 0; transform: translateY(0) translateX(0); }
+    15%  { opacity: 1; }
+    85%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-100vh) translateX(var(--drift)); }
+  }
+
+  /* === CARD === */
+  .card {
+    position: relative;
+    width: 440px;
+    padding: 52px 44px 44px;
+    background: linear-gradient(160deg,
+      rgba(25, 22, 35, 0.97) 0%,
+      rgba(14, 14, 20, 0.99) 50%,
+      rgba(10, 10, 16, 1) 100%);
+    border: 1px solid rgba(212, 160, 23, 0.20);
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 1px rgba(212, 160, 23, 0.08),
+      0 0 60px rgba(80, 40, 160, 0.15),
+      0 2px 4px rgba(0,0,0,0.8),
+      0 20px 80px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(212, 160, 23, 0.06),
+      inset 0 -1px 0 rgba(255,255,255,0.02);
+    text-align: center;
+    animation: card-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes card-reveal {
+    from { opacity: 0; transform: translateY(32px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Top gold accent bar */
+  .card-top-bar {
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      var(--gold-dim) 20%,
+      var(--gold) 50%,
+      var(--gold-dim) 80%,
+      transparent);
+  }
+  .card-top-bar::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 30%; right: 30%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(212, 160, 23, 0.4), transparent);
+    filter: blur(2px);
+  }
+
+  /* Corner ornaments */
+  .orn {
+    position: absolute;
+    width: 22px; height: 22px;
+  }
+  .orn::before, .orn::after {
+    content: '';
+    position: absolute;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+  .orn-tl { top: 14px; left: 14px; }
+  .orn-tl::before { top: 0; left: 0; width: 10px; height: 1px; }
+  .orn-tl::after  { top: 0; left: 0; width: 1px; height: 10px; }
+
+  .orn-tr { top: 14px; right: 14px; }
+  .orn-tr::before { top: 0; right: 0; width: 10px; height: 1px; }
+  .orn-tr::after  { top: 0; right: 0; width: 1px; height: 10px; }
+
+  .orn-bl { bottom: 14px; left: 14px; }
+  .orn-bl::before { bottom: 0; left: 0; width: 10px; height: 1px; }
+  .orn-bl::after  { bottom: 0; left: 0; width: 1px; height: 10px; }
+
+  .orn-br { bottom: 14px; right: 14px; }
+  .orn-br::before { bottom: 0; right: 0; width: 10px; height: 1px; }
+  .orn-br::after  { bottom: 0; right: 0; width: 1px; height: 10px; }
+
+  /* === EMBLEM === */
+  .emblem {
+    margin-bottom: 22px;
+    animation: emblem-breathe 4s ease-in-out infinite;
+  }
+  @keyframes emblem-breathe {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(212, 160, 23, 0.5)) drop-shadow(0 0 2px rgba(212, 160, 23, 0.3)); }
+    50%       { filter: drop-shadow(0 0 18px rgba(212, 160, 23, 0.75)) drop-shadow(0 0 6px rgba(212, 160, 23, 0.5)); }
+  }
+
+  /* === OVERLINE === */
+  .overline {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 7px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.75;
+  }
+
+  /* === TITLE === */
+  .title-main {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 3px;
+    background: linear-gradient(160deg,
+      var(--gold-pale) 0%,
+      var(--gold-bright) 30%,
+      var(--gold) 60%,
+      var(--gold-dim) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 2px;
+  }
+
+  .title-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    color: var(--gray-light);
+    text-transform: uppercase;
+    margin-bottom: 26px;
+  }
+
+  /* === DIVIDER === */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 160, 23, 0.25), transparent);
+  }
+  .divider-center {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .divider-dot {
+    width: 4px; height: 4px;
+    background: var(--gold-dim);
+    transform: rotate(45deg);
+  }
+  .divider-dot-sm {
+    width: 2px; height: 2px;
+    background: rgba(212, 160, 23, 0.4);
+    transform: rotate(45deg);
+  }
+
+  /* === DESCRIPTION === */
+  .desc {
+    font-size: 13.5px;
+    font-weight: 300;
+    color: rgba(180, 175, 200, 0.55);
+    line-height: 1.75;
+    margin-bottom: 30px;
+    letter-spacing: 0.4px;
+  }
+  .desc strong {
+    color: rgba(212, 160, 23, 0.75);
+    font-weight: 600;
+  }
+
+  /* === BUTTON === */
+  .btn-outer {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Purple iridescent glow on hover */
+  .btn-aurora {
+    position: absolute;
+    inset: -2px;
+    border-radius: 2px;
+    background: linear-gradient(135deg,
+      rgba(120, 60, 200, 0.6),
+      rgba(212, 160, 23, 0.4),
+      rgba(150, 80, 240, 0.5));
+    opacity: 0;
+    filter: blur(10px);
+    transition: opacity 0.4s;
+    z-index: 0;
+  }
+  .btn-outer:hover .btn-aurora { opacity: 1; }
+
+  .btn {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    padding: 17px 28px;
+    background: linear-gradient(160deg,
+      rgba(35, 30, 20, 0.95) 0%,
+      rgba(25, 20, 10, 0.98) 100%);
+    border: 1px solid rgba(212, 160, 23, 0.35);
+    border-radius: 2px;
+    color: var(--gold-pale);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow:
+      0 2px 20px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(212, 160, 23, 0.12),
+      inset 0 -1px 0 rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+
+  /* Gold shimmer sweep */
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -120%; width: 50%; height: 100%;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(212, 160, 23, 0.12),
+      rgba(255, 220, 100, 0.08),
+      transparent);
+    transform: skewX(-25deg);
+    transition: left 0.6s ease;
+  }
+  .btn:hover::after { left: 150%; }
+
+  .btn:hover {
+    border-color: rgba(212, 160, 23, 0.65);
+    color: var(--gold-bright);
+    background: linear-gradient(160deg,
+      rgba(45, 38, 20, 0.98) 0%,
+      rgba(35, 28, 12, 1) 100%);
+    box-shadow:
+      0 4px 30px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(212, 160, 23, 0.2),
+      inset 0 1px 0 rgba(212, 160, 23, 0.2);
+    transform: translateY(-1px);
+  }
+  .btn:active { transform: translateY(0); }
+
+  .btn-icon { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.8; }
+  .btn-text { line-height: 1.1; text-align: left; }
+  .btn-text small {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    opacity: 0.5;
+    margin-top: 3px;
+    color: var(--gray-light);
+  }
+
+  /* === FOOTER TAGS === */
+  .tags {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border: 1px solid;
+    border-radius: 1px;
+  }
+  .tag-gold {
+    color: rgba(212, 160, 23, 0.6);
+    border-color: rgba(212, 160, 23, 0.18);
+    background: rgba(212, 160, 23, 0.04);
+  }
+  .tag-gray {
+    color: rgba(144, 144, 168, 0.5);
+    border-color: rgba(144, 144, 168, 0.12);
+    background: rgba(144, 144, 168, 0.03);
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-noise"></div>
+<div class="bg-spotlight"></div>
+<div class="bg-grid"></div>
+<div class="bg-vein bg-vein-1"></div>
+<div class="bg-vein bg-vein-2"></div>
+<div class="bg-glow bg-glow-tl"></div>
+<div class="bg-glow bg-glow-br"></div>
+<div class="particles" id="particles"></div>
+
+<div class="card">
+  <div class="card-top-bar"></div>
+  <div class="orn orn-tl"></div>
+  <div class="orn orn-tr"></div>
+  <div class="orn orn-bl"></div>
+  <div class="orn orn-br"></div>
+
+  <!-- Emblem -->
+  <div class="emblem">
+    <svg width="56" height="44" viewBox="0 0 56 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- crown body -->
+      <path d="M5 39 L10 14 L20 26 L28 4 L36 26 L46 14 L51 39 Z"
+            fill="none" stroke="#d4a017" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- crown fill shimmer -->
+      <path d="M5 39 L10 14 L20 26 L28 4 L36 26 L46 14 L51 39 Z"
+            fill="url(#crownFill)" opacity="0.15"/>
+      <!-- inner line detail -->
+      <path d="M9 39 L12 22 L20 30 L28 12 L36 30 L44 22 L47 39"
+            fill="none" stroke="rgba(212,160,23,0.2)" stroke-width="0.7" stroke-linejoin="round"/>
+      <!-- jewels -->
+      <circle cx="28" cy="4" r="3.5" fill="url(#gemTop)"/>
+      <circle cx="10" cy="14" r="2.5" fill="url(--gray-mid)" stroke="#4a4a60" stroke-width="0.5"/>
+      <circle cx="46" cy="14" r="2.5" fill="url(--gray-mid)" stroke="#4a4a60" stroke-width="0.5"/>
+      <!-- base bar -->
+      <rect x="4" y="37" width="48" height="4" rx="1"
+            fill="url(#baseBar)"/>
+      <rect x="4" y="37" width="48" height="1" rx="0.5"
+            fill="rgba(255,220,100,0.2)"/>
+      <defs>
+        <linearGradient id="crownFill" x1="5" y1="4" x2="51" y2="39">
+          <stop offset="0%" stop-color="#f0c030"/>
+          <stop offset="100%" stop-color="#8a6510"/>
+        </linearGradient>
+        <radialGradient id="gemTop" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#f5e090"/>
+          <stop offset="100%" stop-color="#d4a017"/>
+        </radialGradient>
+        <linearGradient id="baseBar" x1="4" y1="0" x2="52" y2="0">
+          <stop offset="0%" stop-color="transparent"/>
+          <stop offset="20%" stop-color="#8a6510"/>
+          <stop offset="50%" stop-color="#d4a017"/>
+          <stop offset="80%" stop-color="#8a6510"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="overline">Official · Bad Town Council</div>
+  <div class="title-main">BAD TOWN </div>
+  <div class="title-sub">Council Rule · [BT]</div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-center">
+      <div class="divider-dot-sm"></div>
+      <div class="divider-dot"></div>
+      <div class="divider-dot-sm"></div>
+    </div>
+    <div class="divider-line"></div>
+  </div>
+
+  <p class="desc">
+    กฎและระเบียบ<strong>สภา Bad Town</strong> ฉบับสมบูรณ์<br>
+    อ่านและทำความเข้าใจก่อนเข้าร่วมทุกกิจกรรม
+  </p>
+
+  <div class="btn-outer">
+    <div class="btn-aurora"></div>
+    <a class="btn"
+       href="#"
+       onclick="window.top.location.href='https://sites.google.com/view/badcouncil-rule/bad-council-rule'; return false;"
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="16" rx="2"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="7" y1="13" x2="17" y2="13"/>
+        <line x1="7" y1="17" x2="13" y2="17"/>
+      </svg>
+      <div class="btn-text">
+        เปิดกฎสภา BAD TOWN
+        <small>OPEN COUNCIL RULES · [BT]</small>
+      </div>
+    </a>
+  </div>
+
+  <div class="tags">
+    <div class="tag tag-gold">👑 Official</div>
+    <div class="tag tag-gray">📋 Council Rules</div>
+    <div class="tag tag-gold">⚖ Bad Town</div>
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const isGold = Math.random() > 0.4;
+    const size = 1 + Math.random() * 2;
+    p.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      bottom: -6px;
+      width: ${size}px;
+      height: ${size}px;
+      background: ${isGold ? '#d4a017' : 'rgba(150,80,255,0.5)'};
+      box-shadow: 0 0 ${size * 3}px ${isGold ? '#f0c030' : 'rgba(160,90,255,0.6)'};
+      animation-duration: ${8 + Math.random() * 14}s;
+      animation-delay: ${Math.random() * 16}s;
+      --drift: ${(Math.random() - 0.5) * 60}px;
+    `;
+    container.appendChild(p);
+  }
+</script>
+</body>
+</html>
